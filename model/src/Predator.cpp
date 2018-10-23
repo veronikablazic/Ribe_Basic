@@ -48,9 +48,9 @@ Predator::Predator(int animatID) {
 
   distFromTarget = 1000000;
 
-  distanceForAcceleration = 150.0f;
-  velocityMultiplier = 3.0f;
-  attackPeriod = 200;
+  distanceForAcceleration = (std::rand() % (600));
+  velocityMultiplier = (std::rand() % (3));
+  attackPeriod = (std::rand() % (600));
   currentAttackTime = 0;
 }
 
@@ -117,7 +117,7 @@ void Predator::calculate(std::vector<Prey>& preyAnimats) {
     glm::vec2 huntVector = glm::vec2(.0f, .0f);
 	currentAttackTime += 1;
 
-	if (EVOL_PARAMETERS == 1) {
+	#if (EVOL_PARAMETERS == 1)
 		if (currentAttackTime > attackPeriod) {
 			target = NULL;
 			handling = true;
@@ -132,7 +132,7 @@ void Predator::calculate(std::vector<Prey>& preyAnimats) {
 				}
 			}
 		}
-	}
+	#endif
 
     // if has target
     if (target != NULL) {
@@ -150,7 +150,7 @@ void Predator::calculate(std::vector<Prey>& preyAnimats) {
 				if (distFromPrey < AppSettings::catchDistance && !p.isDead) {
 					
 					// it can get confused and not catch it
-					if (CONFUSABILITY == 1) {
+					#if (CONFUSABILITY == 1) 
 						// confusability
 						float random = randomFloat(.0f, 1.0f);
 						int noOfConfusors = 0;
@@ -169,12 +169,12 @@ void Predator::calculate(std::vector<Prey>& preyAnimats) {
 							huntCount += 1;
 							currentAttackTime = 0;
 						}
-					}
-					else {
+					#endif
+					#if (CONFUSABILITY < 2) 
 						p.isDead = true;
 						huntCount += 1;
 						currentAttackTime = 0;
-					}
+					#endif
 
 					// it either catches it or changes targets
 					p.isTarget = false;
@@ -183,7 +183,7 @@ void Predator::calculate(std::vector<Prey>& preyAnimats) {
 					handling = true;
 				}
 				// if it's not close enough to catch the target but we are using Zheng's method of confusibility
-				else if (CONFUSABILITY == 2) {
+				#if (CONFUSABILITY == 2) 
 					huntVector = glm::normalize(p.position - position);
 					std::vector<int> targetsInAttackZone;
 					std::vector<float> targetsInAttackZoneDistance;
@@ -227,10 +227,10 @@ void Predator::calculate(std::vector<Prey>& preyAnimats) {
 						index = targetsInAttackZone2[std::rand() % (n)];
 						target = &(preyAnimats[index]);
 					}
-				}
+				#endif
 
 				// target out of range
-				else if (distFromPrey > AppSettings::huntSize) {
+				if (distFromPrey > AppSettings::huntSize) {
 					p.isTarget = false;
 					target = NULL;
 					target_id = -1;
@@ -311,7 +311,7 @@ void Predator::update() {
   glm::vec2 velocity = getVelocity();
 
   // if fish has energy and we're using energy mode
-  if (ENERGY > 0) {
+  #if (ENERGY > 0) 
 	  // added acceleration if fish still has energy
 	  if (!((energy > 0) && (!isExhausted))) {
 		  isExhausted = true;
@@ -324,7 +324,7 @@ void Predator::update() {
 		  speed = AppSettings::minPredatorVelocity * velocityMultiplier;
 		  velocity = getVelocity();
 	  }
-  }
+  #endif
 
   velocity += acceleration;
 
@@ -339,7 +339,7 @@ void Predator::update() {
   speed = glm::clamp(speed, AppSettings::minPredatorVelocity, AppSettings::maxPredatorVelocity);
 
   // if we're using oxygen consimption
-  if (ENERGY == 1) {
+  #if (ENERGY == 1) 
 	  oxygenConsumption = pow(62.9, (0.21 * (speed / AppSettings::predatorSize))) / 36; //mgO2 / kg h
 	  oxygenConsumption = oxygenConsumption / 360;
 
@@ -349,9 +349,9 @@ void Predator::update() {
 	  else {
 		  energy += regenerationGain;
 	  }
-  }
+  #endif
   // if we're using Zheng's method
-  else if (ENERGY == 2) {
+  #if (ENERGY == 2) 
 	  float pi = 3.14159265358979f;
 	  prevAngle_t = angle_t;
 	  angle_t = atan(heading.y / heading.x);
@@ -364,7 +364,7 @@ void Predator::update() {
 	  else {
 		  energy += regenerationGain;
 	  }
-  }
+  #endif
 
   // half regenerated
   if (isExhausted && (energy >= 0.5)) {
