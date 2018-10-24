@@ -5,22 +5,22 @@
 namespace AppSettings {
 
 	// 0 - no energy, 1 - oxygen consumption, 2 - zheng
-	#define ENERGY 0
-	#define PREY_ENERGY 0
+	#define ENERGY 2
+	#define PREY_ENERGY 2
 	// 0 - predator non confusable, 1 - predator confusable, 2 - predator zheng
-	#define CONFUSABILITY 2
+	#define CONFUSABILITY 0
 	// 0 - no selfish prey escape, 1 - selfish prey escape
 	#define SELFISH_ESCAPE 0
 	// 0 - no hydrodinamics, 1 - hydrodinamics
 	#define HYDRO 0
 	// 0 - no evolution parameters in account, 1 - evolution parameters present
-	#define EVOL_PARAMETERS 0
+	#define EVOL_PARAMETERS 1
 
 	//model
 	const int screenWidth = 1920;
 	const int screenHeight = 1080;
 
-	const int noOfIterations = 20; // 20
+	const int noOfIterations = 10; // 20
 	const int noOfSteps = 600; // 600
 	const int noOfGenerations = 500; // 500
 	const int noOfFlocks = 5; // 5
