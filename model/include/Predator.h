@@ -8,9 +8,9 @@ class Predator
   public:
     Predator();
     Predator(int animatID);
-    Predator(int animatID, float nW, float pW, float cW, float aD, float vM, int aP);
+    Predator(int animatID, float nW, float pW, float cW, float aD, float vM, float aP);
     void calculate(std::vector<Prey>& preyAnimats);
-    void update();
+	void update(std::vector<Prey>& preyAnimats);
 	void reset();
     bool isOnFrontSideOfSchool(Prey const& prey);
     int selectTactic();
@@ -23,7 +23,13 @@ class Predator
     glm::vec2 acceleration;
 
     bool handling;
+	bool wandering;
     int handlingTimer;
+	int wanderingTimer;
+	int wanderingTime = 20;
+	int nextDecision = 5;
+	glm::vec2 unit = glm::vec2(0.0f, 0.0f);
+
     Prey* target;
 	int target_id = -1;
     int huntCount;
@@ -70,4 +76,12 @@ class Predator
 	double depthAttackZone;
 	double timePeriod;			//in seconds
 	double prevPeriod;
+
+
+	// NEW EVOLUTION PARAMETERS
+	float cn0, cn1, cn2, cn3;
+	float cr0, cr1;
+
+	int step;
+
 };
