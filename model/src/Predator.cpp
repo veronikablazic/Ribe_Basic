@@ -28,17 +28,26 @@ Predator::Predator(int animatID) {
   handlingTimer = 0;
 
   //random weights
-  float sum = .0f;
-  nearestWeight = randomFloat(.0f, 1.0f);
-  sum += nearestWeight;
-  peripheralWeight = randomFloat(.0f, 1.0f);
-  sum += peripheralWeight;
-  centreWeight = randomFloat(.0f, 1.0f);
-  sum += centreWeight;
 
-  nearestWeight /= sum;
-  peripheralWeight /= sum;
-  centreWeight /= sum;
+  if (PREY_EVOLUTION == 0) {
+	  float sum = .0f;
+	  nearestWeight = randomFloat(.0f, 1.0f);
+	  sum += nearestWeight;
+	  peripheralWeight = randomFloat(.0f, 1.0f);
+	  sum += peripheralWeight;
+	  centreWeight = randomFloat(.0f, 1.0f);
+	  sum += centreWeight;
+
+	  nearestWeight /= sum;
+	  peripheralWeight /= sum;
+	  centreWeight /= sum;
+  }
+  else {
+	  // for conf = 0
+	  nearestWeight = 1.0f;
+	  centreWeight = .0f;
+	  peripheralWeight = .0f;
+  }
 
   // new variables
   energy = 1;
@@ -53,10 +62,10 @@ Predator::Predator(int animatID) {
   velocityMultiplier = randomFloat(1.0f, 3.0f);
   attackPeriod = randomFloat(1.0f, AppSettings::noOfSteps);*/
 
-  distanceForAcceleration = 440;
-  velocityMultiplier = 1.51;
-  attackPeriod = 211;
-
+  // params for conf = 0
+  distanceForAcceleration = 421.25f;
+  velocityMultiplier = 1.67;
+  attackPeriod = 167;
 
   currentAttackTime = 0;
   step = 0;
@@ -113,6 +122,8 @@ void Predator::reset() {
 	target = NULL;
 	handling = false;
 	handlingTimer = 0;
+
+	energy = 1.0f;
 }
 
 void Predator::calculate(std::vector<Prey>& preyAnimats) {
@@ -282,7 +293,7 @@ void Predator::calculate(std::vector<Prey>& preyAnimats) {
     }
 
     // normalize and multiply with weight
-    if (target != NULL) {
+    if (target != NULL && target_id != -1) {
       //if (!target->isTarget) target->isTarget = true;
       huntVector = glm::normalize(preyAnimats[target_id].position - position);
       acceleration = huntVector * AppSettings::maxPredatorForce;

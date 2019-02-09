@@ -100,6 +100,27 @@ Prey::Prey(int animatID, float wb1, float wr1, float we1, float cn01, float cn11
 	v_r = vr;
 }
 
+void Prey::reset() {
+	// acceleration
+	acceleration = glm::vec2(.0f, .0f);
+
+	// position
+	float x = randomFloat(AppSettings::screenWidth / 2 - AppSettings::worldSize, AppSettings::screenWidth / 2 + AppSettings::worldSize);
+	float y = randomFloat(AppSettings::screenHeight / 2 - AppSettings::worldSize, AppSettings::screenHeight / 2 + AppSettings::worldSize);
+	position = glm::vec2(x, y);
+
+	// speed and heading
+	x = randomFloat(-.1f * AppSettings::minPreyVelocity, .1f * AppSettings::minPreyVelocity);
+	heading = glm::normalize(glm::vec2(x, -1.0f));
+	speed = randomFloat(AppSettings::minPreyVelocity, AppSettings::maxPreyVelocity);
+
+	//isDead = false;
+	isTarget = false;
+	energy = 1.0f;
+
+}
+
+
 void Prey::calculate(Predator const& predator)
 {
 

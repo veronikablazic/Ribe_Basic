@@ -23,6 +23,7 @@ class Prey  {
 	void update(Predator const& predator, std::vector<Prey> &preyAnimats);
     bool isInBlindSpot(glm::vec2 const& animatDirection);
     glm::vec2 getVelocity() const { return speed * heading; }
+	void reset();
 
     bool isDead;
     bool isTarget;

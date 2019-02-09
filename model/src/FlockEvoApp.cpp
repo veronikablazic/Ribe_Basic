@@ -16,7 +16,7 @@ public:
   void run();
 
 private:
-	void simulateGeneration(Predator &predator, std::vector<Prey> tempPrey);
+	void simulateGeneration(Predator &predator, std::vector<Prey> tempPrey, int index);
 	void createNewGeneration();
 
 	std::vector<Predator> predatorAnimats;
@@ -28,7 +28,7 @@ private:
 	int currentPredator;
 	int totalHuntCount;
 
-	std::ofstream CSVFile, CSVFilePrey;
+	std::ofstream CSVFile;
 };
 
 FlockEvoApp::FlockEvoApp() {
@@ -53,10 +53,10 @@ void FlockEvoApp::run() {
     strcat_s(fileName, 64, extension);
     CSVFile = std::ofstream(fileName);
 
-	// log file prey
+	/*// log file prey
 	sprintf_s(fileName, 64, "logPrey%d", iterationCount + 1);
 	strcat_s(fileName, 64, extension);
-	CSVFilePrey = std::ofstream(fileName);
+	CSVFilePrey = std::ofstream(fileName);*/
 
     // create predators
     predatorAnimats.clear();
@@ -67,7 +67,8 @@ void FlockEvoApp::run() {
 	// create prey flocks (save them to preyAnimats)
 	preyAnimats.clear();
 	preyAnimats2.clear();
-	for (int j = 0; j < 500; j++) {
+
+	for (int j = 0; j < AppSettings::noOfPreyAnimats; j++) {
 		std::vector<Prey> tempPrey;
 		for (int i = 0; i < AppSettings::noOfPreyAnimats; i++) {
 			tempPrey.push_back(Prey(i));
@@ -82,54 +83,89 @@ void FlockEvoApp::run() {
 		timer tg;
 
 			// repeat noOfFlocks times
-			for (int flockCount = 0; flockCount < AppSettings::noOfFlocks; flockCount++) {
+			#if(PREY_EVOLUTION == 0)
+				for (int flockCount = 0; flockCount < AppSettings::noOfFlocks; flockCount++) {
 
-				// premade flocks based on evolution results
-				std::vector<Prey> tempPrey = preyAnimats[generationCount * 5 + flockCount];
+					// premade flocks based on evolution results
+					std::vector<Prey> tempPrey = preyAnimats[generationCount * 5 + flockCount];
 
-				std::for_each(predatorAnimats.begin(), predatorAnimats.end(), [this, &tempPrey](Predator& pred){
-					simulateGeneration(pred, tempPrey);
-				});
-			}
+					concurrency::parallel_for_each(predatorAnimats.begin(), predatorAnimats.end(), [this, &tempPrey](Predator& pred){
+						simulateGeneration(pred, tempPrey);
+					});
+				}
+			#endif
+			#if(PREY_EVOLUTION == 1)
+				// predator nas tu ne zanima
+
+				for (int flockCount = 0; flockCount < AppSettings::noOfFlocks; flockCount++) {
+
+					int n = preyAnimats.size();
+				
+					concurrency::parallel_for(0, n, [&](int i) {
+						Predator tempPred = Predator(0);
+						simulateGeneration(tempPred, preyAnimats[i], i);
+					});
+
+
+					/*for (int i = 0; i < preyAnimats.size(); i++) {
+						Predator tempPred = Predator(0);
+						simulateGeneration(tempPred, preyAnimats[i], i);
+					}*/
+				}
+
+				/*concurrency::parallel_for_each(preyAnimats.begin(), preyAnimats.end(), [&tempPred, this](std::vector<Prey>& tempPrey){
+					simulateGeneration(tempPred, tempPrey);
+				});*/
+
+			#endif
 
 			char buffer[128];
 			int deadCount = 0;
+			float totalEnergy = 0;
 			#if (PREY_EVOLUTION == 1)
 			int count = 0;
-				for (std::vector<Prey> prey : preyAnimats2)
+				for (std::vector<Prey> prey : preyAnimats)
 				{
 					count++;
+					deadCount = 0;
 					for (int k = 0; k < 100; k++) {
 						if (prey[k].isDead) deadCount++;
+						else totalEnergy += prey[k].energy;
 					}
 
-					CSVFilePrey << iterationCount + 1 << ';';
-					CSVFilePrey << generationCount + 1 << ';';
-					CSVFilePrey << count << ';';
-					CSVFilePrey << prey[0].wb << ';';
-					CSVFilePrey << prey[0].wr << ';';
-					CSVFilePrey << prey[0].we << ';';
-					CSVFilePrey << prey[0].cn0 << ';';
-					CSVFilePrey << prey[0].cn1 << ';';
-					CSVFilePrey << prey[0].cn2 << ';';
-					CSVFilePrey << prey[0].cn3 << ';';
-					CSVFilePrey << prey[0].cr0 << ';';
-					CSVFilePrey << prey[0].cr1 << ';';
-					CSVFilePrey << prey[0].selfishTime << ';';
-					CSVFilePrey << prey[0].selfishTime2 << ';';
-					CSVFilePrey << prey[0].selfishEscapeDistance << ';';
-					CSVFilePrey << prey[0].selfishProbability << ';';
-					CSVFilePrey << prey[0].dot_pow << ';';
-					CSVFilePrey << prey[0].dotTreshold << ';';
-					CSVFilePrey << prey[0].v_b << ';';
-					CSVFilePrey << prey[0].v_r << ';';
-					CSVFilePrey << std::endl;
+					// povprecna preostala energija
+					totalEnergy = totalEnergy / (prey.size() - deadCount);
+
+					CSVFile << iterationCount + 1 << ';';
+					CSVFile << generationCount + 1 << ';';
+					CSVFile << count << ';';
+					CSVFile << prey[0].wb << ';';
+					CSVFile << prey[0].wr << ';';
+					CSVFile << prey[0].we << ';';
+					CSVFile << prey[0].cn0 << ';';
+					CSVFile << prey[0].cn1 << ';';
+					CSVFile << prey[0].cn2 << ';';
+					CSVFile << prey[0].cn3 << ';';
+					CSVFile << prey[0].cr0 << ';';
+					CSVFile << prey[0].cr1 << ';';
+					CSVFile << prey[0].selfishTime << ';';
+					CSVFile << prey[0].selfishTime2 << ';';
+					CSVFile << prey[0].selfishEscapeDistance << ';';
+					CSVFile << prey[0].selfishProbability << ';';
+					CSVFile << prey[0].dot_pow << ';';
+					CSVFile << prey[0].dotTreshold << ';';
+					CSVFile << prey[0].v_b << ';';
+					CSVFile << prey[0].v_r << ';';
+					CSVFile << totalEnergy << ';';
+					CSVFile << deadCount;
+					CSVFile << std::endl;
 				}
 				
-				//sprintf_s(buffer, "%d %d %d %g s\n", iterationCount + 1, generationCount + 1, tg.elapsed());
-				//std::cout << buffer;
+				sprintf_s(buffer, "%d %d %d %gs\n", iterationCount + 1, generationCount + 1, deadCount, tg.elapsed());
+				std::cout << buffer;
 			#endif
 
+			#if (PREY_EVOLUTION == 0)
 				int reportHuntCount = 0;
 				for (Predator const& predator : predatorAnimats)
 				{
@@ -156,8 +192,10 @@ void FlockEvoApp::run() {
 				sprintf_s(buffer, "%d %d %d %d %g s\n", iterationCount + 1, generationCount + 1, reportHuntCount, deadCount, tg.elapsed());
 				std::cout << buffer;
 
-				CSVFile.close();
-				CSVFilePrey.close();
+			#endif
+
+				//CSVFile.close();
+				//CSVFilePrey.close();
 			
     }
   }
@@ -196,16 +234,20 @@ void searchNeighbours(std::vector<Prey>& prey)
   }
 }
 
-void FlockEvoApp::simulateGeneration(Predator &predator, std::vector<Prey> tempPrey)
+void FlockEvoApp::simulateGeneration(Predator &predator, std::vector<Prey> tempPrey, int index)
 {
   for (int i = 0; i < AppSettings::noOfSteps; i++)
   {
     // calculate
     // prey
     searchNeighbours(tempPrey);
-    for(std::vector<Prey>::iterator p = tempPrey.begin(); p != tempPrey.end(); ++p)
-    {
-      if (!p->isDead) p->calculate(predator);
+
+	for (int j = 0; j < tempPrey.size(); j++) {
+		if (!tempPrey[j].isDead) tempPrey[j].calculate(predator);
+	}
+
+    for(std::vector<Prey>::iterator p = tempPrey.begin(); p != tempPrey.end(); ++p){
+		if (!p->isDead) p->calculate(predator);
     }
     // predator
     predator.calculate(tempPrey);
@@ -217,11 +259,19 @@ void FlockEvoApp::simulateGeneration(Predator &predator, std::vector<Prey> tempP
       if (!p->isDead)
         p->update(predator, tempPrey);
     }
+
+	/*for (int j = 0; j < tempPrey.size(); j++) {
+		if (!tempPrey[j].isDead) tempPrey[j].update(predator, tempPrey);
+	}*/
+
+
     // predator
     predator.update(tempPrey);
   }
 
-	preyAnimats2.push_back(tempPrey);
+	//preyAnimats2.push_back(tempPrey);
+	preyAnimats[index] = tempPrey;
+	for (int j = 0; j < tempPrey.size(); j++) preyAnimats[index][j].reset();
 	predator.reset();
 }
 
@@ -234,6 +284,7 @@ void FlockEvoApp::createNewGeneration() {
   float vX = .0f;
   float vY = -1.0f;
 
+#if(PREY_EVOLUTION == 0)
   //genetic stuff
   std::vector<Predator> oldPredators = predatorAnimats;
   predatorAnimats.clear();
@@ -387,11 +438,12 @@ void FlockEvoApp::createNewGeneration() {
 
   currentPredator = 0;
   totalHuntCount = 0;
+#endif
 
 #if (PREY_EVOLUTION == 1)
 
-  std::vector<std::vector<Prey>> oldPrey = preyAnimats2;
-  preyAnimats2.clear();
+  std::vector<std::vector<Prey>> oldPrey = preyAnimats;
+  preyAnimats.clear();
 
   float totalPreyFitness = 0.0f;
   std::vector<int> noAlive;
@@ -415,11 +467,12 @@ void FlockEvoApp::createNewGeneration() {
 
   // get fitness for each flock
   for (int i = 0; i < oldPrey.size(); i++) {
-	  preyFitness.push_back(noAlive[i] / AppSettings::noOfPreyAnimats + avgEnergy[i] / maxEnergy);
+	  // energija pomnozena z utezjo, ker je manj pomembna od ulova
+	  preyFitness.push_back(noAlive[i] / AppSettings::noOfPreyAnimats + (avgEnergy[i] / maxEnergy) * 0.75);
 	  totalPreyFitness += preyFitness[i];
   }
 
-  for (int i = 0; i < 500; i++) {
+  for (int i = 0; i < 100; i++) {
 	  
 	  int randomIndex = randomInt(0, oldPrey.size() - 1);
 	  std::vector<Prey> firstParent = oldPrey.at(randomIndex);
@@ -429,7 +482,29 @@ void FlockEvoApp::createNewGeneration() {
 
 	  if (totalPreyFitness > 0) {
 
-		  float currentFitness = 0;
+		  float firstFitness = 0.0f;
+		  int firstParentInt = 0;
+		  float secondFitness = 0.0f;
+		  int secondParentInt = 0;
+
+		  // vzamemo 2 najboljsa
+		  for (int j = 0; j < preyFitness.size(); j++) {
+			  if (preyFitness[j] > firstFitness) {
+				  firstFitness = preyFitness[j];
+				  firstParentInt = j;
+				  secondFitness = firstFitness;
+				  secondParentInt = firstParentInt;
+			  }
+			  else if (preyFitness[j] > secondFitness) {
+				  secondFitness = preyFitness[j];
+				  secondParentInt = j;
+			  }
+		  }
+
+		  firstParent = oldPrey.at(firstParentInt);
+		  secondParent = oldPrey.at(secondParentInt);
+
+		  /*float currentFitness = 0;
 		  float randomFitness = randomFloat(0.f, totalPreyFitness);
 
 		  for (int j = 0; j < oldPrey.size(); j++) {
@@ -445,7 +520,7 @@ void FlockEvoApp::createNewGeneration() {
 			  secondParent = oldPrey.at(j);
 			  currentFitness += preyFitness[j];
 			  if (currentFitness >= randomFitness) break;
-		  }
+		  }*/
 	  }
 
 	  float wb1, wr1, we1;

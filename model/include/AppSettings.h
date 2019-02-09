@@ -4,11 +4,15 @@
 
 namespace AppSettings {
 
+	// best conf 0 = BP
+	// best conf 1 = DP
+	// best conf 2 = BP
+
 	// 0 - no energy, 1 - oxygen consumption, 2 - zheng
 	#define ENERGY 2
 	#define PREY_ENERGY 2
 	// 0 - predator non confusable, 1 - predator confusable, 2 - predator zheng
-	#define CONFUSABILITY 2
+	#define CONFUSABILITY 0
 	// 0 - no selfish prey escape, 1 - selfish prey escape
 	#define SELFISH_ESCAPE 1
 	// 0 - no hydrodinamics, 1 - hydrodinamics
