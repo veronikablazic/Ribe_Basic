@@ -8,7 +8,7 @@ class Predator
   public:
     Predator();
     Predator(int animatID);
-    Predator(int animatID, float nW, float pW, float cW, float aD, float vM, float aP);
+	Predator(int animatID, float nW, float pW, float cW, float dA, int aP, int wT, float wb1, float wr1, float we1, float cn01, float cn11, float cn21, float cn31, float cr01, float cr11, float vb, float vr);
     void calculate(std::vector<Prey>& preyAnimats);
 	void update(std::vector<Prey>& preyAnimats);
 	void reset();
@@ -65,8 +65,9 @@ class Predator
 
 	//speed evolution parameters
 	float distanceForAcceleration;		// distance from prey to which predator is using its minimum speed
-	float velocityMultiplier;			// full speed means more energy expense, why use full speed if not necessary, used instead of force multiplier
-	float attackPeriod;				// max attack period in seconds
+	// full speed means more energy expense, why use full speed if not necessary, used instead of force multiplier
+	int attackPeriod;				    // max attack period in seconds
+
 	float currentAttackTime;
 	bool isNearCatch = false;
 	float attackZoneAngle;
@@ -79,8 +80,11 @@ class Predator
 
 
 	// NEW EVOLUTION PARAMETERS
-	float cn0, cn1, cn2, cn3;
-	float cr0, cr1;
+	float wb, cn0, cn1, cn2, cn3;
+	float wr, cr0, cr1;
+	float we;
+
+	float v_b, v_r;
 
 	int step;
 

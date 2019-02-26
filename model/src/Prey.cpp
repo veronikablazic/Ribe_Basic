@@ -33,6 +33,7 @@ Prey::Prey(int animatID)
   selfish = true;
   selfishTimeCount = selfishTime;
 
+  // random
   wb = randomFloat(0.0f, 1.0f);
   wr = randomFloat(0.0f, 1.0f);
   we = randomFloat(0.0f, 1.0f);
@@ -50,6 +51,50 @@ Prey::Prey(int animatID)
   dotTreshold = randomFloat(0.0f, 1.0f);
   v_b = randomFloat(AppSettings::cruisingPrey, AppSettings::maxPreyVelocity);
   v_r = randomFloat(AppSettings::minPreyVelocity, AppSettings::cruisingPrey);
+
+  // for part 3
+  if (CONFUSABILITY == 0) {
+	  wb = 0.3722468f;
+	  wr = 0.3161419f;
+	  we = 0.6299551f;
+	  cn0 = 2.5018065f;
+	  cn2 = 2.4000675f;
+	  cn1 = 25.8324125f;
+	  cn3 = 29.6818380f;
+	  cr0 = 0.6180763f;
+	  cr1 = 30.4128266f;
+	  selfishTime = 265;
+	  selfishTime2 = 381;
+	  selfishEscapeDistance = 374.4657495f;
+	  selfishProbability = 0.7419970f;
+	  dot_pow = 4.3578825f;
+	  dotTreshold = 0.3350814f;
+	  v_b = 3.6446589f;
+	  v_r = 1.0914853f;
+  }
+
+  if (CONFUSABILITY == 2) {
+	  wb = 0.4170351f;
+	  wr = 0.3858759f;
+	  we = 0.5795508f;
+	  cn0 = 2.7217610f;
+	  cn2 = 2.2868971f;
+	  cn1 = 20.3465201f;
+	  cn3 = 23.3440110f;
+	  cr0 = 0.5350711f;
+	  cr1 = 24.4745360f;
+	  selfishTime = 320;
+	  selfishTime2 = 332;
+	  selfishEscapeDistance = 453.2320690f;
+	  selfishProbability = 0.6852589f;
+	  dot_pow = 6.0788430f;
+	  dotTreshold = 0.5904406f;
+	  v_b = 3.4337626f;
+	  v_r = 1.0713825f;
+  }
+
+  // end part 3
+
 
 }
 
@@ -116,7 +161,7 @@ void Prey::reset() {
 
 	//isDead = false;
 	isTarget = false;
-	energy = 1.0f;
+	//energy = 1.0f;
 
 }
 
@@ -225,7 +270,7 @@ void Prey::calculate(Predator const& predator)
   if (cohesionCount > 0)
     acceleration += ((cohesionVector / (float)cohesionCount)) * AppSettings::cohesionWeight;
   
-#if (PREY_ENERGY_PARAMS)
+#if (PREY_ENERGY_PARAMS == 1)
   //  burst -> cruise
   if (speed > cn0)
 	  acceleration += wb * pow(std::min(std::max((speed - cn0) / (AppSettings::maxPreyVelocity - cn0), 0.0f), 1.0f), cn1) * glm::normalize(-getVelocity());
